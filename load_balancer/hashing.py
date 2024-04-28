@@ -12,7 +12,9 @@ class ConsistentHashing:
         self.slots = slots
         self.virtual_servers = int(math.log2(slots))
         self.hash_ring = SortedDict()
+        self.registered_paths = {}
         self.init_servers()
+        self.init_routes()
 
     # j => is the number of virtual servers per server
     # Hash function to map requests to slots
@@ -92,3 +94,11 @@ class ConsistentHashing:
             print("Invalid JSON format in the servers configuration file. Please check and try again.")
         except Exception as e:
             print(f"An error occurred while reading the servers configuration file: {e}")
+
+    def init_routes(self):
+        # all server routes are to be hashed and registered here (register is through saving in a dictionary)
+        self.registered_paths = {
+            'home': 'home',
+            'heartbeat': 'heartbeat',
+            'server_status': 'server_status'
+        }
