@@ -22,5 +22,10 @@ def heartbeat():
     return 'OK', 200
 
 
+@app.route('/server_status', methods=['POST'])
+def server_status():
+    script_dir = os.path.dirname(__file__)
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
+    app.run()

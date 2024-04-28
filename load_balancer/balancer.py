@@ -9,7 +9,7 @@ registered_paths = {'/home', '/heartbeat'}
 
 @app.route('/')
 def root():
-    return redirect('/rep')
+    return redirect('/<path>')
 
 
 @app.route('/rep', methods=['GET'])
@@ -88,4 +88,4 @@ def route_request(path):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, port=5001)

@@ -3,10 +3,10 @@ version: "3.9"
 services:
   server1:
     build:
-      context: ./app
+      context: ./server
       dockerfile: Dockerfile
     ports:
-      - "5001:5000"
+      - "5001:8000"
     environment:
       - SERVER_ID=s001
     networks:
@@ -14,10 +14,10 @@ services:
 
   server2:
     build:
-      context: ./app
+      context: ./server
       dockerfile: Dockerfile
     ports:
-      - "5002:5000"
+      - "5002:8000"
     environment:
       - SERVER_ID=s002
     networks:
@@ -25,10 +25,10 @@ services:
 
   server3:
     build:
-      context: ./app
+      context: ./server
       dockerfile: Dockerfile
     ports:
-      - "5003:5000"
+      - "5003:8000"
     environment:
       - SERVER_ID=s003
     networks:
@@ -42,7 +42,6 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
       - "8000:5000"
-      - "8080:5080"
     depends_on:
       - server1
       - server2

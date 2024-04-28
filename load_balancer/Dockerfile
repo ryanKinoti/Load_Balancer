@@ -6,4 +6,4 @@ COPY . /load_balancer
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "load_balancer.py"]
+CMD ["python", "balancer.py"]
