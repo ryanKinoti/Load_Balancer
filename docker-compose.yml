@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  server1:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    environment:
+      - SERVER_ID=s001
+    networks:
+      - app-network
+
+  server2:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5000"
+    environment:
+      - SERVER_ID=s002
+    networks:
+      - app-network
+
+  server3:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5000"
+    environment:
+      - SERVER_ID=s003
+    networks:
+      - app-network
+
+  load_balancer:
+    build:
+      context: ./load_balancer
+      dockerfile: Dockerfile
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    ports:
+      - "8000:5000"
+      - "8080:5080"
+    depends_on:
+      - server1
+      - server2
+      - server3
+    networks:
+      - app-network
+    environment:
+      - SERVERS=server1,server2,server3
+
+networks:
+  app-network:
+    driver: bridge
