@@ -5,43 +5,52 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    ports:
-      - "5001:8000"
+    container_name: server1
     environment:
       - SERVER_ID=s001
+      - SERVER_PORT=5000
+    ports:
+      - '5051:5000'
     networks:
       - app-network
+    restart: on-failure
 
   server2:
     build:
       context: ./server
       dockerfile: Dockerfile
-    ports:
-      - "5002:8000"
+    container_name: server2
     environment:
       - SERVER_ID=s002
+      - SERVER_PORT=5000
+    ports:
+      - '5052:5000'
     networks:
       - app-network
+    restart: on-failure
 
   server3:
     build:
       context: ./server
       dockerfile: Dockerfile
-    ports:
-      - "5003:8000"
+    container_name: server3
     environment:
       - SERVER_ID=s003
+      - SERVER_PORT=5000
+    ports:
+      - '5053:5000'
     networks:
       - app-network
+    restart: on-failure
 
   load_balancer:
     build:
       context: ./load_balancer
       dockerfile: Dockerfile
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
-      - "8000:5000"
+      - "5555:4050"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - server1
       - server2

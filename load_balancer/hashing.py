@@ -13,10 +13,8 @@ class ConsistentHashing:
         self.slots = slots
         self.virtual_servers = int(math.log2(slots))
         self.hash_ring = SortedDict()
-        self.registered_paths = {}
-        self.init_servers()
-        self.init_routes()
-        # Dictionary to store the virtual servers for each server
+        self.registered_paths = {'home', 'heartbeat', 'server_status'}
+        self.init_servers(os.environ.get('SERVERS', '').split(','))
         self.server_hash_map = {}
 
     # j => is the number of virtual servers per server
@@ -78,25 +76,20 @@ class ConsistentHashing:
         return self.hash_ring
 
     # initiating default servers
-    def init_servers(self):
+    def init_servers(self, hostnames):
         script_dir = os.path.dirname(__file__)
         config_file = os.path.join(script_dir, 'server_configs/default.json')
         try:
             with open(config_file, 'r') as file:
                 server_config = json.load(file)
-                for server in server_config['servers']:
-                    self.add_server_to_ring(server['id'], server['hostname'])
+                # for server in server_config['servers']:
+                # self.add_server_to_ring(server['id'], server['hostname'])
+                for i, hostname in enumerate(hostnames):
+                    server_id = f"server_{i + 1}"
+                    self.add_server_to_ring(server_id, hostname)
         except FileNotFoundError:
             print("No server configuration file found. Please add servers to the load balancer manually.")
         except json.JSONDecodeError:
             print("Invalid JSON format in the servers configuration file. Please check and try again.")
         except Exception as e:
             print(f"An error occurred while reading the servers configuration file: {e}")
-
-    def init_routes(self):
-        # all server routes are to be hashed and registered here (register is through saving in a dictionary)
-        self.registered_paths = {
-            '/home': 'server_1',
-            '/heartbeat': 'server_2',
-            '/server_status': 'server_3'
-        }

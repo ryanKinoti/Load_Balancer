@@ -19,7 +19,7 @@ def home():
 
 @app.route('/heartbeat', methods=['GET'])
 def heartbeat():
-    return 'OK', 200
+    return 'ISS ALL GOOD', 200
 
 
 @app.route('/server_status', methods=['POST'])
@@ -28,4 +28,4 @@ def server_status():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
