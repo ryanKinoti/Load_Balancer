@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import hashlib
 
 from sortedcontainers import SortedDict
 
@@ -15,21 +16,18 @@ class ConsistentHashing:
         self.registered_paths = {}
         self.init_servers()
         self.init_routes()
+        # Dictionary to store the virtual servers for each server
+        self.server_hash_map = {}
 
     # j => is the number of virtual servers per server
     # Hash function to map requests to slots
     def request_hash_fn(self, i):
-        # value = (i + (2 * i) + 17) // 2
-        value = (i ** 2 + 2 * (i ** 2) + 17 ** 2)
-        hash_value = value % self.slots
-        return hash_value
+        return int(hashlib.md5(str(i).encode()).hexdigest(), 16) % self.slots
 
     # Hash function to map virtual servers to slots
     def virtual_hashing(self, server_id, virtual_index):
-        j = virtual_index
-        value = server_id + j + (2 * j) + 25
-        hash_value = value % self.slots
-        return hash_value
+        key = f"{server_id}-{virtual_index}"
+        return int(hashlib.md5(key.encode()).hexdigest(), 16) % self.slots
 
     # Add server to the hash ring
     def add_server_to_ring(self, server_id, hostname):
@@ -98,7 +96,7 @@ class ConsistentHashing:
     def init_routes(self):
         # all server routes are to be hashed and registered here (register is through saving in a dictionary)
         self.registered_paths = {
-            'home': 'home',
-            'heartbeat': 'heartbeat',
-            'server_status': 'server_status'
+            '/home': 'server_1',
+            '/heartbeat': 'server_2',
+            '/server_status': 'server_3'
         }

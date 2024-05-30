@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, redirect
+from sortedcontainers import SortedDict
 
 from hashing import ConsistentHashing
 
@@ -73,18 +74,11 @@ def remove_servers():
         return jsonify(first_failure), 400
 
 
-@app.route('/<path>', methods=['GET'])
+@app.route('/<path:path>', methods=['GET'])
 def route_request(path):
-    try:
-        if path not in registered_paths:
-            return jsonify(message={"error": "Path not registered with the load balancer"}, status="failure"), 404
-
-        request_id = hash(path)
-        print(f"Request ID: {request_id}")
-        server_id = consistent_hash.map_request_to_server(request_id)
-        return jsonify(message=f"Request {path} routed to Server {server_id}"), 200
-    except Exception as e:
-        return jsonify(message={"error": str(e)}, status="failure"), 500
+    print(f"Path: {path}")
+    server_id = consistent_hash.map_request_to_server(hash(path))
+    return jsonify(message=f"Request {path} routed to Server {server_id}"), 200
 
 
 if __name__ == '__main__':
