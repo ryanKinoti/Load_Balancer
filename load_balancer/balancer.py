@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, request, redirect
-from hashing import ConsistentHashing
-import docker
-import os
 import socket
+
+import docker
+from flask import Flask, jsonify, request, redirect
+
+from hashing import ConsistentHashing
 
 app = Flask(__name__)
 consistent_hash = ConsistentHashing()
@@ -25,7 +26,7 @@ def get_replicas():
             status[server_key].append(server_hash)
         return jsonify(
             message={"N": len(status),
-                     "replicas": status
+                     "servers + replicas": status
                      },
             status="successful"
         ), 200
@@ -119,7 +120,12 @@ def route_request(path):
         exposed_port = port_mapping.get(hostname, '5000')
 
         return jsonify(
-            message=f"Following server will handle the {path} request: hostname = {hostname} id = {server_id}",
+            # message=f"Following server will handle the {path} request: hostname = {hostname} id = {server_id}",
+            message={
+                "content": f"The following server will handle the {path} request",
+                "hostname": hostname,
+                "id": server_id
+            },
             url=f'http://{external_ip}:{exposed_port}/{path}',
             container_ip=container_ip,
             status="successful"

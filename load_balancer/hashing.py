@@ -1,8 +1,7 @@
-import json
-import math
-import os
 import hashlib
+import math
 
+import docker
 from sortedcontainers import SortedDict
 
 
@@ -14,7 +13,8 @@ class ConsistentHashing:
         self.virtual_servers = int(math.log2(slots))
         self.hash_ring = SortedDict()
         self.registered_paths = {'home', 'heartbeat', 'server_status'}
-        self.init_servers(os.environ.get('SERVERS', '').split(','))
+        # self.init_servers(os.environ.get('SERVERS', '').split(','))
+        self.init_servers()
         self.server_hash_map = {}
 
     # j => is the number of virtual servers per server
@@ -29,18 +29,21 @@ class ConsistentHashing:
 
     # Add server to the hash ring
     def add_server_to_ring(self, server_id, hostname):
-        if server_id not in self.hash_ring.values():
-            try:
-                for i in range(self.virtual_servers):
-                    server_hash_value = self.virtual_hashing(server_id, i)
-                    self.hash_ring[server_hash_value] = (server_id, hostname)
+        if server_id in [value[0] for value in self.hash_ring.values()]:
 
-                self.no_of_servers += 1
-                print(f"Added server {server_id} with hostname {hostname}")
-            except Exception as e:
-                return {"message": f"An error occurred while adding server {hostname}: {e}", "status": "failure"}, 500
+            for key, value in self.hash_ring.items():
+                if value[0] == server_id:
+                    self.hash_ring[key] = (server_id, hostname)
+                    print(f"Updated server {server_id} with hostname {hostname}")
+                    break
+            raise ValueError(f"Server ID '{server_id}' already exists in the hash ring")
+
         else:
-            print(f"Server {hostname} already exists in the hash map")
+            for i in range(self.virtual_servers):
+                server_hash_value = self.virtual_hashing(server_id, i)
+                self.hash_ring[server_hash_value] = (server_id, hostname)
+            self.no_of_servers += 1
+            print(f"Added server {server_id} with hostname {hostname}")
 
     # Remove server from the hash ring
     def remove_server_from_ring(self, hostname):
@@ -76,20 +79,16 @@ class ConsistentHashing:
         return self.hash_ring
 
     # initiating default servers
-    def init_servers(self, hostnames):
-        script_dir = os.path.dirname(__file__)
-        config_file = os.path.join(script_dir, 'server_configs/default.json')
+    def init_servers(self):
         try:
-            with open(config_file, 'r') as file:
-                server_config = json.load(file)
-                # for server in server_config['servers']:
-                # self.add_server_to_ring(server['id'], server['hostname'])
-                for i, hostname in enumerate(hostnames):
-                    server_id = f"server_{i + 1}"
-                    self.add_server_to_ring(server_id, hostname)
-        except FileNotFoundError:
-            print("No server configuration file found. Please add servers to the load balancer manually.")
-        except json.JSONDecodeError:
-            print("Invalid JSON format in the servers configuration file. Please check and try again.")
-        except Exception as e:
-            print(f"An error occurred while reading the servers configuration file: {e}")
+            client = docker.from_env()  # Connect to the Docker daemon
+            containers = client.containers.list(filters={"name": "server"})  # Get server containers
+
+            for container in containers:
+                env_vars = container.attrs['Config']['Env']  # Get container's environment variables
+                server_id = next((var.split('=')[1] for var in env_vars if var.startswith('SERVER_ID=')), None)
+                if server_id:
+                    self.add_server_to_ring(server_id, container.name)  # Add to hash ring
+
+        except docker.errors.APIError as e:
+            print(f"Error communicating with Docker daemon: {e}")
