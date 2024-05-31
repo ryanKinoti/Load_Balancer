@@ -3,7 +3,6 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: server1
     environment:
       - SERVER_ID=s931
       - SERVER_PORT=5000
@@ -19,7 +18,6 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: server2
     environment:
       - SERVER_ID=s782
       - SERVER_PORT=5000
@@ -35,7 +33,6 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: server3
     environment:
       - SERVER_ID=s9812
       - SERVER_PORT=5000

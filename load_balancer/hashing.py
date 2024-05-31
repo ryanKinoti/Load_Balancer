@@ -13,7 +13,6 @@ class ConsistentHashing:
         self.virtual_servers = int(math.log2(slots))
         self.hash_ring = SortedDict()
         self.registered_paths = {'home', 'heartbeat', 'server_status'}
-        # self.init_servers(os.environ.get('SERVERS', '').split(','))
         self.init_servers()
         self.server_hash_map = {}
 

@@ -108,43 +108,32 @@ def route_request(path):
     if path in consistent_hash.registered_paths:
 
         server_id, hostname = consistent_hash.map_request_to_server(hash(path))
-        container_ip = get_container_ip(hostname)
 
-        external_ip = get_host_ip()
-        # exposed_port = os.environ.get('SERVER_PORT', '5000')
-        port_mapping = {
-            'server1': '5051',
-            'server2': '5052',
-            'server3': '5053'
-        }
-        exposed_port = port_mapping.get(hostname, '5000')
+        container_ip, host_port = get_container_info(hostname)
 
-        return jsonify(
-            # message=f"Following server will handle the {path} request: hostname = {hostname} id = {server_id}",
-            message={
-                "content": f"The following server will handle the {path} request",
-                "hostname": hostname,
-                "id": server_id
-            },
-            url=f'http://{external_ip}:{exposed_port}/{path}',
-            container_ip=container_ip,
-            status="successful"
-        ), 200
-    else:
-        return jsonify(
-            message=f"Error '{path}' endpoint does not exist in server replicas",
-            status="failure"
-        ), 400
+        if not host_port:
+            return jsonify(message="Unable to determine host port", status="failure"), 500
+
+        return redirect(f'http://127.0.0.1:{host_port}/{path}')
 
 
-def get_container_ip(container_name):
+def get_container_info(container_name):
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
     network = client.networks.get("load_balancer_2_app-network")
     container = network.attrs['Containers']
 
     for container_id, container_info in container.items():
         if container_info['Name'] == container_name:
-            return container_info['IPv4Address'].split('/')[0]
+            ip_address = container_info['IPv4Address'].split('/')[0]
+            container_details = client.containers.get(container_id)
+            ports = container_details.attrs['NetworkSettings']['Ports']
+
+            host_port = None
+            for port_mapping in ports.values():
+                if port_mapping and len(port_mapping) > 0:
+                    host_port = port_mapping[0]['HostPort']
+                    break
+            return ip_address, host_port
 
     raise ValueError(f"Container '{container_name}' not found in network")
 
