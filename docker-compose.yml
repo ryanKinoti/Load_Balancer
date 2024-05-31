@@ -4,7 +4,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     environment:
-      - SERVER_ID=s931
+      - SERVER_ID=s622449
       - SERVER_PORT=5000
     ports:
       - '5051:5000'
@@ -19,7 +19,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     environment:
-      - SERVER_ID=s782
+      - SERVER_ID=s147047
       - SERVER_PORT=5000
     ports:
       - '5052:5000'
@@ -34,7 +34,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     environment:
-      - SERVER_ID=s9812
+      - SERVER_ID=s10159
       - SERVER_PORT=5000
     ports:
       - '5053:5000'
@@ -49,7 +49,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     environment:
-      - SERVER_ID=s004
+      - SERVER_ID=s877610
       - SERVER_PORT=5000
     ports:
       - '5054:5000'
