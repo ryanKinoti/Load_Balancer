@@ -19,12 +19,21 @@ class ConsistentHashing:
     # j => is the number of virtual servers per server
     # Hash function to map requests to slots
     def request_hash_fn(self, i):
-        return int(hashlib.md5(str(i).encode()).hexdigest(), 16) % self.slots
+        # return int(hashlib.md5(str(i).encode()).hexdigest(), 16) % self.slots
+        # value = (i + (2 * i) + 17) // 2
+        value = (i ** 2 + 2 * (i ** 2) + 17 ** 2)
+        hash_value = value % self.slots
+        return hash_value
 
     # Hash function to map virtual servers to slots
     def virtual_hashing(self, server_id, virtual_index):
-        key = f"{server_id}-{virtual_index}"
-        return int(hashlib.md5(key.encode()).hexdigest(), 16) % self.slots
+        # key = f"{server_id}-{virtual_index}"
+        # return int(hashlib.md5(key.encode()).hexdigest(), 16) % self.slots
+        numeric_id = int(server_id[1:])
+        j = virtual_index
+        value = numeric_id + j + (2 * j) + 25
+        hash_value = value % self.slots
+        return hash_value
 
     # Add server to the hash ring
     def add_server_to_ring(self, server_id, hostname):

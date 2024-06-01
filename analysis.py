@@ -34,17 +34,20 @@ def analyze_logs(log_files):
 
 def visualize_results(server_counts):
     df = pd.DataFrame.from_dict(server_counts, orient='index', columns=['Request Count'])
-    df.plot(kind='bar')
+    df.plot(kind='line', marker='o')
     plt.title('Load Balancer Request Distribution')
     plt.xlabel('Server ID')
     plt.ylabel('Request Count')
+    plt.grid(axis='y', linestyle='--')
     plt.show()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-    log_files = ['server_logs/s10159.log', 'server_logs/s147047.log',
-                 'server_logs/s622449.log']  # Update with your actual log file paths
+    log_files = [
+        'server_logs/s10159.log',
+        'server_logs/s147047.log',
+        'server_logs/s622449.log'
+    ]
     server_counts = analyze_logs(log_files)
     visualize_results(server_counts)
