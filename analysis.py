@@ -12,7 +12,7 @@ async def send_request(session, url):
 
 async def main():
     url = "http://127.0.0.1:5555/home"  # Load balancer URL
-    num_requests = 10000
+    num_requests = 1000000
 
     async with aiohttp.ClientSession() as session:
         tasks = [send_request(session, url) for _ in range(num_requests)]
@@ -49,5 +49,5 @@ if __name__ == "__main__":
         'server_logs/s147047.log',
         'server_logs/s622449.log'
     ]
-    server_counts = analyze_logs(log_files)
-    visualize_results(server_counts)
+    # server_counts = analyze_logs(log_files)
+    # visualize_results(server_counts)
